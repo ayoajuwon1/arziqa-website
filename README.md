@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Arziqa Website
 
-## Getting Started
+Commodity infrastructure for Nigeria. Storage, processing, and export services to reduce post-harvest losses and connect Nigerian farmers to global markets.
 
-First, run the development server:
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js 16** (App Router)
+- **React 19**
+- **TypeScript**
+- **Tailwind CSS 4**
+- **Framer Motion** (animations)
+- **Lucide React** (icons)
 
-## Learn More
+## Brand Guidelines
 
-To learn more about Next.js, take a look at the following resources:
+| Token | Value | Usage |
+|-------|-------|-------|
+| Primary | `#1B4332` | Dark green - headers, backgrounds, nav |
+| Primary Light | `#2D6A4F` | Lighter green - gradients, accents |
+| Accent | `#C9A84C` | Gold - CTAs, highlights, interactive |
+| Accent Hover | `#B8963F` | Darker gold - hover states |
+| Background | `#FAFAF7` | Off-white page backgrounds |
+| Card BG | `#F5F2EB` | Warm card backgrounds |
+| Text Primary | `#1A1A1A` | Body text |
+| Text Secondary | `#6B7280` | Supporting text |
+| Border | `#E8E5DE` | Subtle borders |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Typography
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Display:** Playfair Display (serif) - headings, brand name
+- **Body:** Inter (sans-serif) - body text, UI
+- **Mono:** System monospace - stats, data
 
-## Deploy on Vercel
+### Design Principles
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- White backgrounds, no dark mode
+- Mercury-inspired light UI
+- Rounded corners (`20px` bento radius)
+- Gradient placeholders (replace with real photography)
+- Scroll-triggered animations via Framer Motion
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pages
+
+- `/` - Homepage with hero, image grid (full/overview toggle), capabilities, stats, news, CTA
+- `/about` - Company story, team, advisory board
+- `/hubs` - Hub map and location cards
+- `/investors` - Gated access request form
+- `/contact` - Contact form and info
+
+## Project Structure
+
+```
+app/
+  layout.tsx          Root layout with fonts, nav, footer
+  page.tsx            Homepage
+  about/page.tsx      About page
+  hubs/page.tsx       Hubs page
+  investors/page.tsx  Investor gate
+  contact/page.tsx    Contact form
+components/
+  Navbar.tsx          Sticky transparent-to-white nav
+  ViewToggle.tsx      Full view / Overview pill toggle
+  ViewContext.tsx      React context for view state
+  Hero.tsx            Full-screen hero with gradient
+  FadeIn.tsx          Reusable scroll-triggered fade-in
+  ImageGrid.tsx       Cinematic grid with two display modes
+  Counter.tsx         Animated number counter
+  StatsSection.tsx    Key statistics with counters
+  CapabilitiesGrid.tsx  2x4 icon grid
+  HubMap.tsx          SVG Nigeria map with hub dots
+  NewsCards.tsx       Article card row
+  Footer.tsx          Site footer
+```
+
+## Deploy
+
+Deploy on [Vercel](https://vercel.com) for the best Next.js experience.
