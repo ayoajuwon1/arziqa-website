@@ -1,26 +1,40 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { ViewProvider } from "@/components/ViewContext";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-serif",
   subsets: ["latin"],
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const dmSans = DM_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
+  weight: ["300", "400", "500", "600"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Arziqa | Commodity Infrastructure for Nigeria",
+  title: "Arziqa \u2014 Journey of a Grain",
   description:
-    "Arziqa builds commodity storage, processing, and export infrastructure to reduce post-harvest losses and connect Nigerian farmers to global markets.",
+    "Follow a single sesame seed from a Nigerian farmer\u2019s hand to a buyer in Osaka. Arziqa builds commodity storage, processing, and export infrastructure across Nigeria.",
   keywords: [
     "Nigeria",
     "commodity",
@@ -30,6 +44,8 @@ export const metadata: Metadata = {
     "export",
     "post-harvest",
     "infrastructure",
+    "sesame",
+    "Arziqa",
   ],
 };
 
@@ -41,15 +57,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${inter.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${dmSans.variable} ${jetbrainsMono.variable} ${caveat.variable}`}
     >
-      <body className="min-h-full bg-white text-text-primary">
-        <ViewProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </ViewProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
