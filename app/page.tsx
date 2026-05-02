@@ -527,8 +527,6 @@ export default function Home() {
         data-name="The Beginning"
         ref={(el) => { stagesRef.current[7] = el; }}
       >
-        <div className="ring" />
-        <div className="ring r2" />
         <div className="logo">
           Arz<span className="i-dot">i</span>qa
         </div>
