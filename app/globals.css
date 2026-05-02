@@ -356,12 +356,16 @@ body::before {
 .s-harvest {
   padding: 0;
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: flex-end;
+  overflow: hidden;
 }
 .s-harvest .bg {
   position: absolute;
-  inset: 0;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
   background-image: url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=2400&q=80');
   background-size: cover;
   background-position: center;
@@ -527,13 +531,17 @@ body::before {
 .s-hub {
   padding: 0;
   min-height: 100vh;
+  min-height: 100svh;
   position: relative;
   display: flex;
   align-items: center;
+  overflow: hidden;
 }
 .s-hub .bg {
   position: absolute;
-  inset: 0;
+  inset: -5%;
+  width: 110%;
+  height: 110%;
   background-image: url('https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=2400&q=80');
   background-size: cover;
   background-position: center;
@@ -969,13 +977,17 @@ body::before {
 .s-voyage {
   padding: 0;
   min-height: 100vh;
+  min-height: 100svh;
   position: relative;
   display: flex;
   align-items: flex-end;
+  overflow: hidden;
 }
 .s-voyage .bg {
   position: absolute;
-  inset: 0;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
   background-image: url('https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=2400&q=80');
   background-size: cover;
   background-position: center;
