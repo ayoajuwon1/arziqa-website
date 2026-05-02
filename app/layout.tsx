@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Sans, JetBrains_Mono, Caveat } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans, JetBrains_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+const playfair = Playfair_Display({
   variable: "--font-serif",
   subsets: ["latin"],
   display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
-const dmSans = DM_Sans({
+const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
@@ -57,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${dmSans.variable} ${jetbrainsMono.variable} ${caveat.variable}`}
+      className={`${playfair.variable} ${jakarta.variable} ${jetbrainsMono.variable} ${caveat.variable}`}
     >
       <body>{children}</body>
     </html>

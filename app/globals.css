@@ -32,12 +32,6 @@
   --caveat: var(--font-caveat), cursive;
 }
 
-h1, h2, .s-harvest h1, .s-hub h2, .s-receipt h2, .s-trans h2, .s-voyage h2, .s-value h2, .s-begin .logo, .s-crisis .big, .s-value .big {
-  font-feature-settings: "ss01" on, "ss02" on;
-}
-.s-harvest h1, .s-hub h2, .s-receipt h2, .s-trans h2, .s-voyage h2 {
-  font-variation-settings: "opsz" 144, "SOFT" 50;
-}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: auto; }
@@ -1447,22 +1441,104 @@ body::before {
 .inner-page .back-link:hover { opacity: .7; }
 
 /* responsive */
+/* ============ TABLET ============ */
 @media (max-width: 980px) {
   .nav { padding: 18px 20px; }
   .nav .links { display: none; }
   .rail { display: none; }
-  .chapter { right: 20px; top: 18px; }
-  .stage { padding: 120px 24px 80px 24px; }
+  .chapter { right: 20px; top: 18px; font-size: 9px; padding: 6px 10px; }
+  .progress-arc { top: 16px; right: 16px; width: 36px; height: 36px; }
+  .stage { padding: 100px 24px 80px 24px; }
   .stage-tag, .stage-foot { left: 24px; right: 24px; }
   .s-harvest .body, .s-hub .body, .s-voyage .body { padding: 0 24px 64px; }
-  .s-crisis, .s-receipt, .s-trans, .s-value, .s-begin { padding: 120px 24px; }
+  .s-crisis, .s-receipt, .s-trans, .s-value, .s-begin { padding: 100px 24px; }
+  .s-harvest h1 { font-size: clamp(40px, 8vw, 80px); }
   .s-receipt { flex-direction: column; gap: 48px; }
-  .s-receipt .right { flex: 1 1 auto; width: 100%; max-width: 460px; }
+  .s-receipt .right { flex: 1 1 auto; width: 100%; max-width: 100%; }
+  .receipt { transform: rotate(1deg); padding: 32px 28px; }
   .s-hub .specs { position: static; transform: none; margin-top: 32px; }
+  .s-hub h2 { font-size: clamp(40px, 7vw, 80px); }
   .s-crisis .data, .s-value .grid { grid-template-columns: 1fr 1fr; }
-  .s-trans .arrow-row { gap: 24px; }
-  .s-trans .price { font-size: 80px; }
-  .s-begin .ring { width: 380px; height: 380px; }
-  .s-begin .ring.r2 { width: 520px; height: 520px; }
-  .inner-page { padding: 120px 24px 80px 24px; }
+  .s-crisis .big { font-size: clamp(180px, 30vw, 400px); }
+  .s-trans .arrow-row { gap: 24px; flex-direction: column; align-items: flex-start; }
+  .s-trans .price { font-size: clamp(56px, 12vw, 100px); }
+  .s-trans .arrow { font-size: 40px; transform: rotate(90deg); }
+  .s-voyage .route { flex-direction: column; gap: 16px; }
+  .s-voyage .route .dash { min-width: unset; width: 60px; height: 1px; }
+  .s-voyage .ledger { flex-direction: column; gap: 0; }
+  .s-voyage .ledger .e { border-right: none; border-bottom: 1px solid rgba(184,146,74,.15); }
+  .s-voyage h2 { font-size: clamp(36px, 6vw, 72px); }
+  .s-value .big { font-size: clamp(120px, 22vw, 300px); }
+  .s-value .grid { gap: 1px; }
+  .s-value .cell { padding: 28px 20px; min-height: 140px; }
+  .s-value .cell .n { font-size: 40px; }
+  .s-begin .logo { font-size: clamp(64px, 14vw, 180px); }
+  .s-begin .tagline { font-size: 22px; }
+  .s-begin .ctas { flex-direction: column; width: 100%; }
+  .s-begin .ctas a { justify-content: center; }
+  .inner-page { padding: 100px 24px 80px 24px; }
+  .s-harvest .stat-line { flex-direction: column; gap: 24px; }
+  .s-harvest .micro { flex-direction: column; gap: 8px; }
+}
+
+/* ============ MOBILE ============ */
+@media (max-width: 600px) {
+  .nav { padding: 14px 16px; }
+  .nav .brand { font-size: 18px; }
+  .chapter { font-size: 8px; padding: 5px 8px; right: 14px; top: 14px; }
+  .progress-arc { top: 12px; right: 12px; width: 30px; height: 30px; }
+  .stage { padding: 80px 16px 60px 16px; min-height: auto; min-height: 100svh; }
+  .stage-tag { left: 16px; font-size: 9px; }
+  .stage-foot { left: 16px; right: 16px; font-size: 8px; bottom: 16px; }
+  .s-harvest .body { padding: 0 16px 48px; }
+  .s-harvest h1 { font-size: clamp(32px, 9vw, 56px); max-width: 100%; }
+  .s-harvest .stat-line b { font-size: 24px; }
+  .s-harvest .eyebrow { font-size: 9px; }
+  .s-crisis { padding: 80px 16px; min-height: 100svh; }
+  .s-crisis .big { font-size: clamp(120px, 28vw, 280px); }
+  .s-crisis .pull { font-size: 22px; }
+  .s-crisis .data { grid-template-columns: 1fr; }
+  .s-crisis .data .d .n { font-size: 40px; }
+  .s-hub .body { padding: 0 16px 48px; }
+  .s-hub h2 { font-size: clamp(32px, 8vw, 56px); }
+  .s-hub .lede { font-size: 18px; }
+  .s-hub .pills { gap: 8px; }
+  .s-hub .pill { padding: 10px 16px; font-size: 9px; }
+  .s-hub .specs .row { padding: 16px 20px; min-width: unset; }
+  .s-hub .specs .row b { font-size: 22px; }
+  .s-receipt { padding: 80px 16px; gap: 32px; }
+  .s-receipt h2 { font-size: clamp(32px, 7vw, 56px); }
+  .s-receipt .lede { font-size: 16px; }
+  .receipt { padding: 24px 20px; transform: rotate(0deg); }
+  .receipt .top .l { font-size: 20px; }
+  .receipt .total b { font-size: 28px; }
+  .receipt .seal { width: 64px; height: 64px; right: 16px; bottom: 16px; }
+  .receipt .seal b { font-size: 11px; }
+  .receipt .seal span { font-size: 6px; }
+  .receipt .watermark { font-size: 48px; }
+  .s-trans { padding: 80px 16px; }
+  .s-trans h2 { font-size: clamp(28px, 6vw, 48px); }
+  .s-trans .price { font-size: clamp(48px, 14vw, 80px); }
+  .s-trans .badge { font-size: 11px; padding: 12px 20px; }
+  .s-trans .footnote { font-size: 15px; }
+  .s-voyage .body { padding: 0 16px 48px; }
+  .s-voyage h2 { font-size: clamp(28px, 7vw, 48px); }
+  .s-voyage .route .city { font-size: clamp(20px, 4vw, 32px); }
+  .s-voyage .ledger .e { padding: 14px 16px; }
+  .s-voyage .ledger .e .t { font-size: 16px; }
+  .s-value { padding: 80px 16px; }
+  .s-value .big { font-size: clamp(80px, 20vw, 200px); }
+  .s-value .big .unit { font-size: .08em; }
+  .s-value h2 { font-size: 24px; margin-top: 32px; }
+  .s-value .grid { grid-template-columns: 1fr; margin-top: 64px; }
+  .s-value .cell .n { font-size: 36px; }
+  .s-begin { padding: 80px 16px; }
+  .s-begin .logo { font-size: clamp(48px, 13vw, 120px); margin-bottom: 24px; }
+  .s-begin .tagline { font-size: 18px; margin-bottom: 48px; }
+  .s-begin .arabic { font-size: 11px; margin-bottom: 48px; }
+  .s-begin .ctas a { padding: 16px 24px; font-size: 10px; width: 100%; }
+  .s-begin .footer-bar { flex-direction: column; gap: 8px; left: 16px; right: 16px; bottom: 24px; text-align: center; }
+  .loader .seed-text { font-size: 24px; }
+  .loader .seed-mark { font-size: 8px; left: 16px; bottom: 24px; }
+  .inner-page { padding: 80px 16px 60px; }
 }
