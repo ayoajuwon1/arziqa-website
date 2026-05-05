@@ -146,6 +146,7 @@ export default function Home() {
           <Link href="/hubs">Network</Link>
           <Link href="/investors">Investors</Link>
           <Link href="/contact">Contact</Link>
+          <Link href="/command" style={{ color: '#00D4FF' }}>Command</Link>
         </div>
       </nav>
 
