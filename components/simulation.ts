@@ -2,6 +2,39 @@
 // Pure TypeScript module — no React imports
 // Seeded randomness ensures same month always produces same state
 
+// ─── SIM CONFIG ───
+
+export interface SimConfig {
+  month: number;
+  utilization: number;
+  storageFee: number;
+  exportMargin: number;
+  exportTurns: number;
+  wrSpread: number;
+  exportWc: number;
+  wrWc: number;
+  hubsEnabled: Record<string, boolean>;
+  exportsEnabled: Record<string, boolean>;
+  manualEvents: string[];
+}
+
+export const DEFAULT_CONFIG: SimConfig = {
+  month: 0,
+  utilization: 0.70,
+  storageFee: 7,
+  exportMargin: 0.12,
+  exportTurns: 4,
+  wrSpread: 0.15,
+  exportWc: 25_000_000,
+  wrWc: 15_000_000,
+  hubsEnabled: { kano: true, makurdi: true, ibadan: true, gombe: true, abakaliki: true, calabar: true },
+  exportsEnabled: { sesame: true, cashew: true, cocoa: true, other: true },
+  manualEvents: [],
+};
+
+export const WORST_CONFIG: Partial<SimConfig> = { utilization: 0.45, storageFee: 5, exportMargin: 0.06, exportTurns: 2, wrSpread: 0.10 };
+export const BEST_CONFIG: Partial<SimConfig> = { utilization: 0.85, storageFee: 8, exportMargin: 0.15, exportTurns: 5, wrSpread: 0.18 };
+
 // ─── TYPES ───
 
 export interface SimulationState {
@@ -228,7 +261,13 @@ function lerp(a: number, b: number, t: number): number {
 
 // ─── MAIN SIMULATE FUNCTION ───
 
-export function simulate(month: number): SimulationState {
+export function simulate(configOrMonth: SimConfig | number): SimulationState {
+  // Backward compat: accept plain month number
+  const config: SimConfig = typeof configOrMonth === "number"
+    ? { ...DEFAULT_CONFIG, month: configOrMonth }
+    : configOrMonth;
+
+  const month = config.month;
   const rng = new SeededRNG(month * 1000);
   const calMonth = getCalendarMonth(month);
   const phase = getPhase(month);
@@ -237,6 +276,18 @@ export function simulate(month: number): SimulationState {
   let alertIdx = 0;
 
   const makeAlertId = () => `alert-${month}-${alertIdx++}`;
+
+  // Compute export commodity fraction based on enabled exports
+  const EXPORT_WEIGHTS: Record<string, number> = { sesame: 0.40, cashew: 0.30, cocoa: 0.20, other: 0.10 };
+  const exportFraction = Object.entries(config.exportsEnabled)
+    .filter(([, v]) => v)
+    .reduce((sum, [key]) => sum + (EXPORT_WEIGHTS[key] || 0), 0);
+
+  // Price modifier from events
+  const priceCrash = config.manualEvents.includes("price_crash");
+  const priceBoom = config.manualEvents.includes("price_boom");
+  const priceMultiplier = priceCrash ? 0.70 : priceBoom ? 1.30 : 1.0;
+  const banExports = config.manualEvents.includes("ban_exports");
 
   // ─── HUBS ───
   const hubs: HubState[] = HUBS_DATA.map((h) => {
@@ -252,12 +303,25 @@ export function simulate(month: number): SimulationState {
       constructionPct = Math.min(100, Math.round(((month - constructionStart) / 12) * 100));
     }
 
-    // Utilization ramp
+    // Force offline if hub disabled in config
+    if (config.hubsEnabled[h.id] === false) {
+      status = "offline";
+      constructionPct = 0;
+    }
+
+    // Force offline from manual events
+    if (h.id === "makurdi" && config.manualEvents.includes("flood_makurdi")) {
+      status = "offline";
+      constructionPct = 0;
+    }
+
+    // Utilization ramp — use config.utilization as target cap
     let utilization = 0;
     let stored = 0;
     if (status === "operational") {
       const monthsOp = month - h.onlineMonth;
-      const baseUtil = Math.min(85, 30 + monthsOp * 2.5);
+      const targetUtil = config.utilization * 100; // e.g. 0.70 -> 70
+      const baseUtil = Math.min(targetUtil, 30 + monthsOp * 2.5);
       // Seasonal adjustment: harvest months (Oct-Feb) higher utilization
       const seasonal = (calMonth >= 9 || calMonth <= 1) ? 10 : -5;
       utilization = Math.min(95, Math.max(10, baseUtil + seasonal + (rng.next() * 10 - 5)));
@@ -452,18 +516,19 @@ export function simulate(month: number): SimulationState {
   const totalCapacity = hubs.filter(h => h.status === "operational").reduce((s, h) => s + h.capacity, 0);
   const monthFactor = Math.max(0, month - 11); // revenue starts when first hub online
 
-  // Revenue streams (monthly, in USD)
-  const storage = totalStored * 2.5; // $2.5/MT/month
+  // Revenue streams (monthly, in USD) — use config values
+  const storage = totalStored * config.storageFee; // config.storageFee $/MT/month
   const ca = totalStored * 0.3 * 1.5; // 30% in CA at $1.5 premium
   const processing = totalStored * 0.15 * 8; // 15% processed at $8/MT
-  const exportRev = monthFactor > 6 ? (rng.nextInt(100, 400) * 1000) * (operationalHubs.length / 2) : 0;
-  const wr = totalStored * 0.2 * 3; // 20% financed, $3/MT spread
+  const baseExportRev = monthFactor > 6 ? (rng.nextInt(100, 400) * 1000) * (operationalHubs.length / 2) * config.exportMargin / 0.12 * config.exportTurns / 4 : 0;
+  const exportRev = banExports ? 0 : baseExportRev * exportFraction * priceMultiplier;
+  const wr = totalStored * 0.2 * (config.wrSpread / 0.15) * 3; // adjusted by WR spread
   const logistics = trucks.filter(t => t.status === "en_route").length * 2500;
   const facilitation = exportRev * 0.02;
   const insurance = totalStored * 0.5;
   const preCooling = totalStored * 0.05 * 4;
   const cma = totalStored * 0.1 * 2;
-  const totalRevenue = storage + ca + processing + exportRev + wr + logistics + facilitation + insurance + preCooling + cma;
+  const totalRevenue = (storage + ca + processing + exportRev + wr + logistics + facilitation + insurance + preCooling + cma) * priceMultiplier;
 
   // OpEx
   const baseOpex = 340000; // base monthly
@@ -479,8 +544,8 @@ export function simulate(month: number): SimulationState {
   const capexDeployed = Math.min(173_400_000, month * (173_400_000 / 36));
   const cumulativeFcf = monthFactor > 0 ? ebitda * monthFactor * 0.6 - capexDeployed * 0.1 : -capexDeployed * (month / 36) * 0.1;
   const cashPosition = Math.max(0, 25_000_000 + cumulativeFcf);
-  const wrDeployed = totalStored * 0.2 * 180; // avg commodity value $180/MT
-  const exportWcDeployed = exportRev * 2.5;
+  const wrDeployed = Math.min(config.wrWc, totalStored * 0.2 * 180); // capped by WR working capital
+  const exportWcDeployed = Math.min(config.exportWc, exportRev * 2.5);
 
   // ─── RECEIPTS ───
   const totalIssued = Math.round(totalStored * 0.4 + monthFactor * 50);
@@ -512,9 +577,9 @@ export function simulate(month: number): SimulationState {
     const base = COMMODITY_BASE_PRICES[commodity];
     const seasonalMult = (calMonth >= 9 || calMonth <= 1) ? 0.9 : 1.1; // Lower at harvest, higher in lean
     const noise = seededRandom(month * 100 + idx) * 0.2 - 0.1;
-    const price = Math.round(base * seasonalMult * (1 + noise));
+    const price = Math.round(base * seasonalMult * (1 + noise) * priceMultiplier);
     const prevNoise = seededRandom((month - 1) * 100 + idx) * 0.2 - 0.1;
-    const prevPrice = Math.round(base * seasonalMult * (1 + prevNoise));
+    const prevPrice = Math.round(base * seasonalMult * (1 + prevNoise) * priceMultiplier);
     const change = prevPrice > 0 ? Math.round(((price - prevPrice) / prevPrice) * 1000) / 10 : 0;
     return { commodity, price, change };
   });

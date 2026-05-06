@@ -13,6 +13,7 @@ interface Props {
   selectedTruck: number | null;
   onHubClick: (hubId: string) => void;
   onTruckClick: (truckId: number) => void;
+  disabledHubs?: string[];
 }
 
 const COLORS = {
@@ -40,7 +41,7 @@ function truckColor(status: TruckState["status"]): string {
   return COLORS.gray;
 }
 
-export default function SimMap({ hubs, trucks, ports, selectedHub, selectedTruck, onHubClick, onTruckClick }: Props) {
+export default function SimMap({ hubs, trucks, ports, selectedHub, selectedTruck, onHubClick, onTruckClick, disabledHubs = [] }: Props) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hubMarkersRef = useRef<Map<string, L.CircleMarker>>(new Map());
@@ -89,25 +90,27 @@ export default function SimMap({ hubs, trucks, ports, selectedHub, selectedTruck
     for (const hub of hubs) {
       existingHubIds.delete(hub.id);
       let marker = hubMarkersRef.current.get(hub.id);
+      const isDisabled = disabledHubs.includes(hub.id);
       const radius = hub.status === "operational" ? 10 + (hub.utilization / 20) : 7;
-      const color = selectedHub === hub.id ? COLORS.cyan : hubColor(hub.status);
+      const color = isDisabled ? COLORS.gray : (selectedHub === hub.id ? COLORS.cyan : hubColor(hub.status));
+      const opacity = isDisabled ? 0.2 : 0.8;
 
       if (!marker) {
         marker = L.circleMarker([hub.lat, hub.lng], {
           radius,
           fillColor: color,
-          fillOpacity: 0.8,
+          fillOpacity: opacity,
           color: color,
           weight: selectedHub === hub.id ? 3 : 1,
         }).addTo(map);
         marker.on("click", () => onHubClickRef.current(hub.id));
-        marker.bindTooltip(`${hub.name} (${hub.status})`, { direction: "top", className: "dark-tooltip" });
+        marker.bindTooltip(`${hub.name} (${isDisabled ? "disabled" : hub.status})`, { direction: "top", className: "dark-tooltip" });
         hubMarkersRef.current.set(hub.id, marker);
       } else {
         marker.setLatLng([hub.lat, hub.lng]);
         marker.setRadius(radius);
-        marker.setStyle({ fillColor: color, color: color, weight: selectedHub === hub.id ? 3 : 1 });
-        marker.setTooltipContent(`${hub.name} — ${hub.status === "operational" ? `${Math.round(hub.utilization)}% util` : hub.status}`);
+        marker.setStyle({ fillColor: color, color: color, fillOpacity: opacity, weight: selectedHub === hub.id ? 3 : 1 });
+        marker.setTooltipContent(`${hub.name} — ${isDisabled ? "disabled" : (hub.status === "operational" ? `${Math.round(hub.utilization)}% util` : hub.status)}`);
       }
     }
     existingHubIds.forEach(id => { hubMarkersRef.current.get(id)?.remove(); hubMarkersRef.current.delete(id); });
@@ -179,7 +182,7 @@ export default function SimMap({ hubs, trucks, ports, selectedHub, selectedTruck
         }
       }
     }
-  }, [hubs, trucks, ports, selectedHub, selectedTruck]);
+  }, [hubs, trucks, ports, selectedHub, selectedTruck, disabledHubs]);
 
   useEffect(() => { updateMarkers(); }, [updateMarkers]);
 

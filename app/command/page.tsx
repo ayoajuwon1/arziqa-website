@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { simulate } from "../../components/simulation";
-import type { SimulationState } from "../../components/simulation";
+import { simulate, DEFAULT_CONFIG } from "../../components/simulation";
+import type { SimulationState, SimConfig } from "../../components/simulation";
+import ControlPanel from "../../components/cmd/ControlPanel";
 import Overview from "../../components/cmd/Overview";
 import HubPanel from "../../components/cmd/HubPanel";
 import FleetPanel from "../../components/cmd/FleetPanel";
@@ -48,23 +49,28 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
 ];
 
 export default function CommandPage() {
-  const [month, setMonth] = useState(0);
+  const [config, setConfig] = useState<SimConfig>(DEFAULT_CONFIG);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [selectedHub, setSelectedHub] = useState<string | null>(null);
   const [selectedTruck, setSelectedTruck] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [controlsOpen, setControlsOpen] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Baseline for comparison
+  const baselineState = useMemo(() => simulate({ ...DEFAULT_CONFIG, month: config.month }), [config.month]);
+
   // Run simulation
-  const state: SimulationState = useMemo(() => simulate(month), [month]);
+  const state: SimulationState = useMemo(() => simulate(config), [config]);
+  const month = config.month;
 
   // Play/stop
   useEffect(() => {
     if (playing) {
       const ms = speed === 1 ? 3000 : speed === 5 ? 600 : 300;
       intervalRef.current = setInterval(() => {
-        setMonth(m => { if (m >= 120) { setPlaying(false); return 120; } return m + 1; });
+        setConfig(c => { if (c.month >= 120) { setPlaying(false); return { ...c, month: 120 }; } return { ...c, month: c.month + 1 }; });
       }, ms);
     } else {
       if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
@@ -117,6 +123,21 @@ export default function CommandPage() {
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         {/* LEFT NAV */}
         <div style={{ width: 72, display: "flex", flexDirection: "column", borderRight: `1px solid ${C.border}`, background: C.card, flexShrink: 0, paddingTop: 8 }}>
+          {/* Controls button */}
+          <button
+            onClick={() => setControlsOpen(o => !o)}
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              padding: "10px 4px", margin: "2px 4px", border: "none", borderRadius: 6,
+              background: controlsOpen ? "rgba(201,168,76,0.1)" : "transparent",
+              borderLeft: controlsOpen ? `2px solid ${C.gold}` : "2px solid transparent",
+              color: controlsOpen ? C.gold : C.dim,
+              cursor: "pointer", fontFamily: mono, transition: "all 0.15s",
+            }}
+          >
+            <span style={{ fontSize: 16, marginBottom: 2 }}>⚙</span>
+            <span style={{ fontSize: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Controls</span>
+          </button>
           {TABS.map(tab => (
             <button
               key={tab.id}
@@ -136,6 +157,18 @@ export default function CommandPage() {
           ))}
         </div>
 
+        {/* CONTROL PANEL */}
+        {controlsOpen && (
+          <ControlPanel
+            config={config}
+            onChange={setConfig}
+            onClose={() => setControlsOpen(false)}
+            baselineRevenue={baselineState.financials.revenue.total}
+            baselineEbitda={baselineState.financials.ebitda}
+            baselineRoe={baselineState.financials.roe}
+          />
+        )}
+
         {/* CENTER MAP */}
         <div style={{ flex: 1, position: "relative" }}>
           <SimMap
@@ -146,6 +179,7 @@ export default function CommandPage() {
             selectedTruck={selectedTruck}
             onHubClick={handleHubClick}
             onTruckClick={handleTruckClick}
+            disabledHubs={Object.entries(config.hubsEnabled).filter(([, v]) => !v).map(([k]) => k)}
           />
         </div>
 
@@ -169,7 +203,7 @@ export default function CommandPage() {
           <button onClick={() => setPlaying(!playing)} style={{ width: 36, height: 36, borderRadius: 6, border: `1px solid ${C.border}`, background: playing ? "rgba(239,68,68,0.15)" : "rgba(34,197,94,0.15)", color: playing ? C.red : C.green, fontFamily: mono, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {playing ? "\u25A0" : "\u25B6"}
           </button>
-          <button onClick={() => { setMonth(0); setPlaying(false); }} style={{ width: 36, height: 36, borderRadius: 6, border: `1px solid ${C.border}`, background: "rgba(255,255,255,0.03)", color: C.dim, fontFamily: mono, fontSize: 11, cursor: "pointer" }}>RST</button>
+          <button onClick={() => { setConfig(c => ({ ...c, month: 0 })); setPlaying(false); }} style={{ width: 36, height: 36, borderRadius: 6, border: `1px solid ${C.border}`, background: "rgba(255,255,255,0.03)", color: C.dim, fontFamily: mono, fontSize: 11, cursor: "pointer" }}>RST</button>
         </div>
 
         {/* Speed selector */}
@@ -184,7 +218,7 @@ export default function CommandPage() {
           <span style={{ fontSize: 9, color: C.dim, fontFamily: mono, minWidth: 20 }}>0</span>
           <input
             type="range" min={0} max={120} value={month}
-            onChange={e => { setMonth(Number(e.target.value)); setPlaying(false); }}
+            onChange={e => { setConfig(c => ({ ...c, month: Number(e.target.value) })); setPlaying(false); }}
             style={{ flex: 1, accentColor: C.cyan, height: 4, cursor: "pointer" }}
           />
           <span style={{ fontSize: 9, color: C.dim, fontFamily: mono, minWidth: 24 }}>120</span>
@@ -193,7 +227,7 @@ export default function CommandPage() {
         {/* Phase jumps */}
         <div style={{ display: "flex", gap: 2 }}>
           {[{ label: "P1", month: 12 }, { label: "P2", month: 24 }, { label: "P3", month: 48 }, { label: "Y5", month: 60 }, { label: "Y10", month: 120 }].map(j => (
-            <button key={j.label} onClick={() => { setMonth(j.month); setPlaying(false); }} style={{ padding: "4px 6px", borderRadius: 4, border: `1px solid ${C.border}`, background: "rgba(255,255,255,0.03)", color: C.dim, fontFamily: mono, fontSize: 9, cursor: "pointer" }}>{j.label}</button>
+            <button key={j.label} onClick={() => { setConfig(c => ({ ...c, month: j.month })); setPlaying(false); }} style={{ padding: "4px 6px", borderRadius: 4, border: `1px solid ${C.border}`, background: "rgba(255,255,255,0.03)", color: C.dim, fontFamily: mono, fontSize: 9, cursor: "pointer" }}>{j.label}</button>
           ))}
         </div>
 
