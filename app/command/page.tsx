@@ -101,6 +101,9 @@ export default function CommandPage() {
   const critCount = state.alerts.filter(a => a.severity === "critical").length;
   const warnCount = state.alerts.filter(a => a.severity === "warning").length;
 
+  // Disabled hubs for map
+  const disabledHubs = Object.entries(config.hubsEnabled).filter(([, v]) => !v).map(([k]) => k);
+
   return (
     <div style={{ width: "100vw", height: "100vh", display: "flex", flexDirection: "column", background: C.bg, overflow: "hidden", fontFamily: mono }}>
       {/* ─── TOP BAR ─── */}
@@ -156,18 +159,6 @@ export default function CommandPage() {
             </button>
           ))}
         </div>
-
-        {/* CONTROL PANEL */}
-        {controlsOpen && (
-          <ControlPanel
-            config={config}
-            onChange={setConfig}
-            onClose={() => setControlsOpen(false)}
-            baselineRevenue={baselineState.financials.revenue.total}
-            baselineEbitda={baselineState.financials.ebitda}
-            baselineRoe={baselineState.financials.roe}
-          />
-        )}
 
         {/* CENTER MAP */}
         <div style={{ flex: 1, position: "relative" }}>
@@ -247,6 +238,18 @@ export default function CommandPage() {
           )}
         </div>
       </div>
+
+      {/* CONTROL PANEL — positioned fixed, above everything */}
+      {controlsOpen && (
+        <ControlPanel
+          config={config}
+          onChange={setConfig}
+          onClose={() => setControlsOpen(false)}
+          baselineRevenue={baselineState.financials.revenue.total}
+          baselineEbitda={baselineState.financials.ebitda}
+          baselineRoe={baselineState.financials.roe}
+        />
+      )}
     </div>
   );
 }

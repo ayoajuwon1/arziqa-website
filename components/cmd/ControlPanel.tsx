@@ -128,7 +128,7 @@ export default function ControlPanel({ config, onChange, onClose, baselineRevenu
 
   return (
     <div style={{
-      position: "fixed", left: 72, top: 44, bottom: 80, width: 400, zIndex: 100,
+      position: "fixed", left: 72, top: 44, bottom: 80, width: 400, zIndex: 10000,
       background: C.bg, borderRight: `1px solid ${C.border}`,
       display: "flex", flexDirection: "column", fontFamily: mono,
     }}>
